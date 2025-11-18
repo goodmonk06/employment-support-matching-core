@@ -15,6 +15,9 @@ export interface User {
   /** 利用者ID */
   id: string;
 
+  /** 組織ID */
+  organizationId?: string;
+
   /** 利用者名 */
   name: string;
 
@@ -26,4 +29,34 @@ export interface User {
 
   /** 利用可能な曜日 */
   availableDays: DayOfWeek[];
+
+  /** ステータス */
+  status?: 'active' | 'inactive' | 'on_leave' | 'graduated';
+
+  /** プロファイル情報 */
+  profile?: {
+    /** 年齢 */
+    age?: number;
+
+    /** 障害種別 */
+    disabilityType?: string;
+
+    /** 希望する作業タイプ */
+    preferredTaskTypes?: string[];
+
+    /** 避けたい作業タイプ */
+    avoidTaskTypes?: string[];
+
+    /** 目標 */
+    goals?: string[];
+  };
+
+  /** タグ */
+  tags?: string[];
+
+  /** 作成日時 */
+  createdAt?: Date;
+
+  /** 更新日時 */
+  updatedAt?: Date;
 }

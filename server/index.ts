@@ -3,7 +3,12 @@ import cors from '@fastify/cors';
 import { userRoutes } from './routes/users';
 import { taskRoutes } from './routes/tasks';
 import { matchingRoutes } from './routes/matching';
+import { organizationRoutes } from './routes/organizations';
+import { historyRoutes } from './routes/history';
+import { scheduleRoutes } from './routes/schedules';
 import { errorHandler } from './utils/errorHandler';
+import { store } from './store/InMemoryStore';
+import { metrics } from '../src/lib/metrics';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -25,10 +30,18 @@ async function buildServer() {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
+  // Metrics endpoint
+  fastify.get('/metrics', async () => {
+    return metrics.getAllMetrics();
+  });
+
   // API routes
   await fastify.register(userRoutes, { prefix: '/api' });
   await fastify.register(taskRoutes, { prefix: '/api' });
   await fastify.register(matchingRoutes, { prefix: '/api' });
+  await fastify.register(organizationRoutes, { prefix: '/api' });
+  await fastify.register(historyRoutes, { prefix: '/api' });
+  await fastify.register(scheduleRoutes, { prefix: '/api' });
 
   // Error handler
   fastify.setErrorHandler(errorHandler);
@@ -42,21 +55,50 @@ async function start() {
   try {
     await fastify.listen({ port: PORT, host: HOST });
     console.log(`🚀 Server is running at http://${HOST}:${PORT}`);
-    console.log(`📊 Health check: http://${HOST}:${PORT}/health`);
-    console.log(`📚 API endpoints:`);
+    console.log(`📊 Health: http://${HOST}:${PORT}/health`);
+    console.log(`📈 Metrics: http://${HOST}:${PORT}/metrics`);
+    console.log(`\n📚 API Endpoints:`);
+    console.log(`\n  Organizations:`);
+    console.log(`   - POST   /api/organizations`);
+    console.log(`   - GET    /api/organizations`);
+    console.log(`   - GET    /api/organizations/:id`);
+    console.log(`   - GET    /api/organizations/:id/stats`);
+    console.log(`\n  Users:`);
     console.log(`   - POST   /api/users`);
     console.log(`   - GET    /api/users`);
     console.log(`   - GET    /api/users/:id`);
     console.log(`   - PUT    /api/users/:id`);
     console.log(`   - DELETE /api/users/:id`);
+    console.log(`\n  Tasks:`);
     console.log(`   - POST   /api/tasks`);
     console.log(`   - GET    /api/tasks`);
     console.log(`   - GET    /api/tasks/:id`);
     console.log(`   - PUT    /api/tasks/:id`);
     console.log(`   - DELETE /api/tasks/:id`);
+    console.log(`\n  Matching:`);
     console.log(`   - POST   /api/matching`);
     console.log(`   - GET    /api/users/:userId/best-tasks`);
     console.log(`   - GET    /api/tasks/:taskId/best-users`);
+    console.log(`\n  History & Analytics:`);
+    console.log(`   - GET    /api/history`);
+    console.log(`   - GET    /api/history/:id`);
+    console.log(`   - PUT    /api/history/:id`);
+    console.log(`   - GET    /api/users/:userId/history`);
+    console.log(`\n  Schedules:`);
+    console.log(`   - POST   /api/schedules`);
+    console.log(`   - GET    /api/schedules`);
+    console.log(`   - GET    /api/schedules/:id`);
+    console.log(`   - PUT    /api/schedules/:id`);
+    console.log(`   - DELETE /api/schedules/:id`);
+    console.log(`   - POST   /api/schedules/:id/publish`);
+
+    // Log current data counts
+    const stats = {
+      users: store.getAllUsers().length,
+      tasks: store.getAllTasks().length,
+      organizations: store.getAllOrganizations().length,
+    };
+    console.log(`\n📊 Current Data: ${stats.users} users, ${stats.tasks} tasks, ${stats.organizations} organizations`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
