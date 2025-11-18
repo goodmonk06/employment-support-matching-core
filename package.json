@@ -5,9 +5,15 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "example": "ts-node examples/basic-matching.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch server/index.ts",
+    "build": "tsc && tsc -p tsconfig.server.json",
+    "start": "node dist/server/index.js",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "example": "tsx examples/basic-matching.ts",
+    "db:seed": "tsx scripts/seed.ts"
   },
   "keywords": [
     "matching",
@@ -17,9 +23,19 @@
   ],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.26.0",
+    "@fastify/cors": "^9.0.1",
+    "zod": "^3.22.4"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
     "ts-node": "^10.9.0",
-    "typescript": "^5.0.0"
+    "tsx": "^4.7.1",
+    "typescript": "^5.0.0",
+    "vitest": "^1.2.2"
   }
 }
